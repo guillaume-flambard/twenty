@@ -296,9 +296,13 @@ export class SignInUpService {
         newUserWithPicture: PartialUserWithPicture;
       };
 
+      // Same rule as the other sign-up paths: without it, removing the last
+      // server admin's member leaves the instance with no way back in (#29790).
+      const shouldGrantServerAdmin = !(await this.hasServerAdmin());
+
       const user = await this.saveNewUser(userData.newUserWithPicture, {
-        canAccessFullAdminPanel: false,
-        canImpersonate: false,
+        canAccessFullAdminPanel: shouldGrantServerAdmin,
+        canImpersonate: shouldGrantServerAdmin,
       });
 
       await this.activateOnboardingForUser({
